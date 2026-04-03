@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>信長之野望霸道徵調推薦</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 8px;
+      font-family: "Microsoft JhengHei", sans-serif;
+      font-size: 10px;
+      background: #F4FCF4;
+      color: #222;
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #DAE4DA;
+      border-radius: 8px;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .left-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card {
+      border: 1px solid #DAE4DA;
+      border-radius: 6px;
+      padding: 6px;
+      background: #f4fcf4;
+      box-sizing: border-box;
+    }
+
+    .card-options {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      margin-top: 6px;
+      align-items: center;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .card-options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 9px;
+      line-height: 1.1;
+      cursor: pointer;
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .mini-table td {
+      padding: 3px 2px;
+      font-size: 8px;
+    }
+
+    .card-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+      font-size: 10px;
+    }
+
+    /* card-line removed */
+
+    .right-tables {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .table-box {
+      border: 1px solid #DAE4DA;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .table-title {
+      padding: 5px 6px;
+      font-size: 10px;
+      font-weight: bold;
+      background: #eef4EE;
+      border-bottom: 1px solid #DAE4DA;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border: 1px solid #DAE4DA;
+      padding: 4px 3px;
+      text-align: center;
+      font-size: 9px;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    th {
+      background: #f4fFf4;
+      font-weight: bold;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .right-tables {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="panel">
+      <div class="panel-title">武將資料</div>
+      <div class="left-grid" id="leftGrid"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">推薦順序</div>
+      <div class="right-tables">
+        <div class="table-box">
+          <div class="table-title">步兵補正估算</div>
+          <table>
+            <thead>
+              <tr>
+                <th>武將</th>
+                <th>估計值</th>
+              </tr>
+            </thead>
+            <tbody id="table1Body"></tbody>
+          </table>
+        </div>
+
+        <div class="table-box">
+          <div class="table-title">騎兵補正估算</div>
+          <table>
+            <thead>
+              <tr>
+                <th>武將</th>
+                <th>估計值</th>
+              </tr>
+            </thead>
+            <tbody id="table2Body"></tbody>
+          </table>
+        </div>
+
+        <div class="table-box">
+          <div class="table-title">弓兵補正估算</div>
+          <table>
+            <thead>
+              <tr>
+                <th>武將</th>
+                <th>估計值</th>
+              </tr>
+            </thead>
+            <tbody id="table3Body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const leftGrid = document.getElementById("leftGrid");
+    const headers = ["步", "騎", "弓", "初始政治", "星數加成(滿星)", "滿星政治(LV1)", "政治練達(1階)"];
+    const blockData = [
+{"title": "SR毛利隆元", "values": ["C", "C", "A", 86, 275, 361, 11]},
+{"title": "SR石川數正", "values": ["C", "C", "S", 85, 272, 357, 11]},
+{"title": "SR北條幻庵", "values": ["C", "C", "S", 84, 268, 352, 11]},
+{"title": "SR大道寺政繁", "values": ["C", "B", "A", 83, 265, 348, 11]},
+{"title": "SR香宗我部親泰", "values": ["B", "B", "S", 82, 262, 344, 11]},
+{"title": "SR內藤昌豐", "values": ["C", "B", "A", 81, 259, 340, 11]},
+{"title": "SR佐竹義宣", "values": ["A", "B", "B", 81, 259, 340, 11]},
+{"title": "SR筒井順慶", "values": ["C", "B", "B", 81, 259, 340, 11]},
+{"title": "SR直江景綱", "values": ["C", "A", "B", 80, 256, 336, 10]},
+{"title": "SR堀秀政", "values": ["B", "B", "B", 77, 246, 323, 10]},
+{"title": "SR栗山善助", "values": ["B", "A", "B", 74, 236, 310, 10]},
+{"title": "SR島津歲久", "values": ["B", "C", "A", 72, 230, 302, 9]},
+{"title": "SR愛姬", "values": ["C", "A", "B", 72, 230, 302, 9]},
+{"title": "SR鬼庭綱元", "values": ["C", "B", "A", 70, 224, 294, 9]},
+{"title": "SR尼子晴久", "values": ["B", "B", "B", 70, 224, 294, 9]},
+{"title": "SR長宗我部信親", "values": ["S", "B", "B", 67, 214, 281, 9]},
+{"title": "SR酒井忠次", "values": ["S", "B", "A", 67, 214, 281, 9]},
+{"title": "SR宇喜多秀家", "values": ["B", "B", "B", 64, 204, 268, 8]},
+{"title": "SR池田恆興", "values": ["B", "A", "B", 64, 204, 268, 8]},
+{"title": "SR荒木村重", "values": ["B", "C", "B", 63, 201, 264, 8]},
+{"title": "SR秋山虎繁", "values": ["B", "A", "B", 63, 201, 264, 8]},
+{"title": "SR佐佐成政", "values": ["B", "A", "C", 62, 198, 260, 8]},
+{"title": "SR甘粕景持", "values": ["C", "B", "A", 55, 176, 231, 7]},
+{"title": "SR戶澤盛安", "values": ["C", "S", "A", 55, 176, 231, 7]},
+{"title": "SR加藤嘉明", "values": ["A", "B", "B", 52, 166, 218, 7]},
+{"title": "SR太田資正", "values": ["A", "C", "A", 50, 160, 210, 7]},
+{"title": "SR榊原康政", "values": ["B", "B", "A", 49, 156, 205, 7]},
+{"title": "SR齋藤利三", "values": ["C", "B", "A", 46, 147, 193, 6]},
+{"title": "SR明智秀滿", "values": ["B", "A", "C", 44, 140, 184, 6]},
+{"title": "SR飯富虎昌", "values": ["C", "S", "B", 41, 131, 172, 6]},
+{"title": "SR岡部元信", "values": ["A", "B", "C", 40, 128, 168, 5]},
+{"title": "SR森可成", "values": ["A", "B", "C", 39, 124, 163, 5]},
+{"title": "SR籾井教業", "values": ["C", "A", "B", 38, 121, 159, 5]},
+{"title": "SR清水宗治", "values": ["B", "B", "B", 38, 121, 159, 5]},
+{"title": "SR鈴木佐大夫", "values": ["B", "C", "B", 37, 118, 155, 5]},
+{"title": "SR本庄繁長", "values": ["B", "S", "C", 36, 115, 151, 5]},
+{"title": "SR赤井直正", "values": ["B", "A", "C", 36, 115, 151, 5]},
+{"title": "SR島津豐久", "values": ["C", "A", "C", 34, 108, 142, 5]},
+{"title": "SR母里太兵衛", "values": ["S", "B", "C", 24, 76, 100, 3]},
+{"title": "R結城晴朝", "values": ["B", "C", "A", 87, 234, 321, 10]},
+{"title": "R北信愛", "values": ["B", "B", "A", 78, 210, 288, 9]},
+{"title": "R山內一豐", "values": ["C", "B", "B", 65, 175, 240, 8]},
+{"title": "R穗井田元清", "values": ["C", "B", "A", 63, 170, 233, 8]},
+{"title": "R遠山綱景", "values": ["C", "C", "A", 60, 162, 222, 7]},
+{"title": "R佐久間信盛", "values": ["B", "C", "B", 56, 151, 207, 7]},
+{"title": "R里見義弘", "values": ["C", "B", "A", 55, 148, 203, 7]},
+{"title": "R小山田信茂", "values": ["B", "C", "A", 55, 148, 203, 7]},
+{"title": "R吉良親貞", "values": ["A", "A", "C", 52, 140, 192, 6]},
+{"title": "R松平信康", "values": ["B", "B", "C", 51, 137, 188, 6]},
+{"title": "R鮭延秀綱", "values": ["C", "A", "B", 46, 124, 170, 6]},
+{"title": "R新納忠元", "values": ["B", "A", "B", 44, 118, 162, 5]},
+{"title": "R九戶政實", "values": ["B", "A", "C", 43, 116, 159, 5]},
+{"title": "R鬼庭左月齋", "values": ["B", "A", "B", 40, 108, 148, 5]},
+{"title": "R北條高廣", "values": ["B", "A", "C", 42, 97, 139, 5]},
+{"title": "R長宗我部盛親", "values": ["A", "B", "C", 35, 94, 129, 4]},
+{"title": "R森長可", "values": ["B", "A", "B", 34, 91, 125, 4]},
+{"title": "R保科正俊", "values": ["A", "B", "C", 33, 89, 122, 4]},
+{"title": "R新發田重家", "values": ["C", "A", "C", 30, 81, 111, 4]},
+{"title": "R仙石秀久", "values": ["B", "C", "C", 30, 81, 111, 4]},
+{"title": "R磯野員昌", "values": ["B", "A", "C", 28, 75, 103, 4]},
+{"title": "R十河一存", "values": ["A", "A", "C", 27, 72, 99, 3]},
+{"title": "R遠藤直經", "values": ["C", "B", "A", 20, 54, 74, 3]},
+{"title": "R原虎胤", "values": ["A", "C", "C", 20, 54, 74, 3]},
+{"title": "R鳥居元忠", "values": ["B", "C", "B", 15, 40, 55, 2]},
+{"title": "R真壁氏幹", "values": ["A", "C", "C", 15, 40, 55, 2]},
+{"title": "R真柄直隆", "values": ["A", "C", "B", 13, 35, 48, 2]},
+{"title": "R渡邊守綱", "values": ["A", "C", "C", 12, 32, 44, 2]},
+{"title": "R可兒才藏", "values": ["S", "C", "C", 11, 29, 40, 2]},
+{"title": "R小島彌太郎", "values": ["A", "C", "B", 10, 27, 37, 2]},
+{"title": "N淺野長政", "values": ["C", "C", "B", 79, 205, 284, 8]},
+{"title": "N大久保忠鄰", "values": ["B", "C", "C", 77, 200, 277, 8]},
+{"title": "N松田憲秀", "values": ["C", "C", "B", 73, 189, 262, 8]},
+{"title": "N二階堂盛義", "values": ["C", "B", "C", 69, 179, 248, 7]},
+{"title": "N支倉常長", "values": ["C", "C", "B", 68, 176, 244, 7]},
+{"title": "N毛利輝元", "values": ["B", "C", "B", 63, 163, 226, 7]},
+{"title": "N片桐且元", "values": ["B", "C", "C", 60, 156, 216, 6]},
+{"title": "N今川氏真", "values": ["B", "C", "B", 59, 153, 212, 6]},
+{"title": "N中村一氏", "values": ["C", "C", "B", 59, 153, 212, 6]},
+{"title": "N三好長逸", "values": ["C", "B", "C", 65, 145, 210, 6]},
+{"title": "N朝比奈泰能", "values": ["B", "C", "B", 56, 145, 201, 6]},
+{"title": "N三好政康", "values": ["B", "B", "C", 53, 137, 190, 6]},
+{"title": "N齋藤龍興", "values": ["C", "C", "B", 48, 124, 172, 5]},
+{"title": "N成田長親", "values": ["B", "C", "C", 48, 124, 172, 5]},
+{"title": "N隈部親永", "values": ["B", "B", "B", 45, 117, 162, 5]},
+{"title": "N武田義信", "values": ["C", "A", "B", 45, 117, 162, 5]},
+{"title": "N岩成友通", "values": ["C", "C", "B", 45, 117, 162, 5]},
+{"title": "N尼子義久", "values": ["B", "C", "B", 39, 101, 140, 4]},
+{"title": "N上杉憲政", "values": ["C", "C", "B", 37, 96, 133, 4]},
+{"title": "N小早川秀秋", "values": ["C", "B", "C", 22, 57, 79, 2]}];
+
+    const stepBonusMap = {
+      C: 0,
+      B: 70,
+      A: 140,
+      S: 210
+    };
+
+    const blockVariables = new Array(blockData.length).fill(null);
+    const blockVariables2 = new Array(blockData.length).fill(null);
+    const blockVariables3 = new Array(blockData.length).fill(null);
+
+    function calculateBlockValue(item, starValue) {
+      const step = item.values[0];
+      const initialPolitics = Number(item.values[3]);
+      const maxStarBonus = Number(item.values[4]);
+      const stepBonus = stepBonusMap[step] ?? 0;
+      return initialPolitics + stepBonus + ((maxStarBonus + 700) * starValue / 7);
+    }
+
+    function calculateBlockValueByRide(item, starValue) {
+      const ride = item.values[1];
+      const initialPolitics = Number(item.values[3]);
+      const maxStarBonus = Number(item.values[4]);
+      const rideBonus = stepBonusMap[ride] ?? 0;
+      return initialPolitics + rideBonus + ((maxStarBonus + 700) * starValue / 7);
+    }
+
+    function calculateBlockValueByBow(item, starValue) {
+      const bow = item.values[2];
+      const initialPolitics = Number(item.values[3]);
+      const maxStarBonus = Number(item.values[4]);
+      const bowBonus = stepBonusMap[bow] ?? 0;
+      return initialPolitics + bowBonus + ((maxStarBonus + 700) * starValue / 7);
+    }
+
+    function renderTable1() {
+      const table1Body = document.getElementById("table1Body");
+      table1Body.innerHTML = "";
+
+      const answeredItems = [];
+      blockData.forEach((item, index) => {
+        if (blockVariables[index] != null) {
+          answeredItems.push({
+            title: item.title,
+            rawValue: blockVariables[index],
+            value: Math.ceil(blockVariables[index])
+          });
+        }
+      });
+
+      answeredItems.sort((a, b) => b.rawValue - a.rawValue);
+
+      const rowCount = Math.max(answeredItems.length, 1);
+
+      for (let i = 0; i < rowCount; i++) {
+        const row = document.createElement("tr");
+        const title = answeredItems[i]?.title ?? "";
+        const value = answeredItems[i]?.value ?? "";
+        row.innerHTML = `
+          <td>${title}</td>
+          <td>${value}</td>
+        `;
+        table1Body.appendChild(row);
+      }
+    }
+
+    function renderTable2() {
+      const table2Body = document.getElementById("table2Body");
+      table2Body.innerHTML = "";
+
+      const answeredItems = [];
+      blockData.forEach((item, index) => {
+        if (blockVariables2[index] != null) {
+          answeredItems.push({
+            title: item.title,
+            rawValue: blockVariables2[index],
+            value: Math.ceil(blockVariables2[index])
+          });
+        }
+      });
+
+      answeredItems.sort((a, b) => b.rawValue - a.rawValue);
+
+      const rowCount = Math.max(answeredItems.length, 1);
+
+      for (let i = 0; i < rowCount; i++) {
+        const row = document.createElement("tr");
+        const title = answeredItems[i]?.title ?? "";
+        const value = answeredItems[i]?.value ?? "";
+        row.innerHTML = `
+          <td>${title}</td>
+          <td>${value}</td>
+        `;
+        table2Body.appendChild(row);
+      }
+    }
+
+    function renderTable3() {
+      const table3Body = document.getElementById("table3Body");
+      table3Body.innerHTML = "";
+
+      const answeredItems = [];
+      blockData.forEach((item, index) => {
+        if (blockVariables3[index] != null) {
+          answeredItems.push({
+            title: item.title,
+            rawValue: blockVariables3[index],
+            value: Math.ceil(blockVariables3[index])
+          });
+        }
+      });
+
+      answeredItems.sort((a, b) => b.rawValue - a.rawValue);
+
+      const rowCount = Math.max(answeredItems.length, 1);
+
+      for (let i = 0; i < rowCount; i++) {
+        const row = document.createElement("tr");
+        const title = answeredItems[i]?.title ?? "";
+        const value = answeredItems[i]?.value ?? "";
+        row.innerHTML = `
+          <td>${title}</td>
+          <td>${value}</td>
+        `;
+        table3Body.appendChild(row);
+      }
+    }
+
+    function recalculateAllBlockVariables() {
+      blockData.forEach((item, index) => {
+        const checked = document.querySelector(`input[name="block-${index + 1}"]:checked`);
+        if (!checked) {
+          blockVariables[index] = null;
+          blockVariables2[index] = null;
+          blockVariables3[index] = null;
+          return;
+        }
+        const starValue = Number(checked.value);
+        blockVariables[index] = calculateBlockValue(item, starValue);
+        blockVariables2[index] = calculateBlockValueByRide(item, starValue);
+        blockVariables3[index] = calculateBlockValueByBow(item, starValue);
+      });
+      renderTable1();
+    renderTable2();
+    renderTable3();
+      renderTable2();
+      renderTable3();
+      console.log("表格1用89個變數：", blockVariables);
+      console.log("表格2用89個變數：", blockVariables2);
+      console.log("表格3用89個變數：", blockVariables3);
+    }
+
+    blockData.forEach((item, index) => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const headerRow = headers.map(text => `<td>${text}</td>`).join("");
+      const valueRow = item.values.map(text => `<td>${text}</td>`).join("");
+
+      let optionsHtml = "";
+      for (let option = 1; option <= 8; option++) {
+        optionsHtml += `
+          <label>
+            <input type="radio" name="block-${index + 1}" value="${option - 1}">
+            ${option - 1}
+          </label>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="card-title">${item.title}</div>
+        <table class="mini-table">
+          <tbody>
+            <tr>${headerRow}</tr>
+            <tr>${valueRow}</tr>
+          </tbody>
+        </table>
+        <div class="card-title" style="margin-top: 6px; margin-bottom: 4px;">星數</div>
+        <div class="card-options">
+          ${optionsHtml}
+        </div>
+      `;
+
+      leftGrid.appendChild(card);
+    });
+
+    document.querySelectorAll('input[type="radio"]').forEach((radio) => {
+      radio.addEventListener("change", recalculateAllBlockVariables);
+    });
+
+    renderTable1();
+  </script>
+</body>
+</html>
