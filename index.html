@@ -238,8 +238,8 @@
 
     .floating-search-btn {
       position: fixed;
-      left: 8px;
-      top: 8px;
+      left: 0;
+      top: 0;
       z-index: 9999;
       font-size: 11px;
       padding: 6px 8px;
@@ -253,6 +253,7 @@
       background: #ffffff;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
       cursor: pointer;
+      transform: translate(8px, 8px);
     }
 
     .floating-search-btn:hover {
@@ -261,12 +262,10 @@
 
     @media (max-width: 768px) {
       .floating-search-btn {
-        left: 6px;
-        top: 6px;
         font-size: 10px;
         padding: 5px 7px;
-        max-width: calc(100vw - 12px);
       }
+    }
     }
 
     .search-hit {
@@ -693,6 +692,30 @@
         btn.addEventListener('click', searchClipboardText);
       }
     });
+
+    function updateFloatingButtonPosition() {
+      const btn = document.getElementById('clipboardSearchBtn');
+      if (!btn) return;
+
+      if (window.visualViewport) {
+        const x = window.visualViewport.offsetLeft + 8;
+        const y = window.visualViewport.offsetTop + 8;
+        btn.style.transform = `translate(${x}px, ${y}px)`;
+      } else {
+        btn.style.transform = 'translate(8px, 8px)';
+      }
+    }
+
+    window.addEventListener('load', updateFloatingButtonPosition);
+    window.addEventListener('resize', updateFloatingButtonPosition);
+    window.addEventListener('scroll', updateFloatingButtonPosition);
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateFloatingButtonPosition);
+      window.visualViewport.addEventListener('scroll', updateFloatingButtonPosition);
+    }
+
+    updateFloatingButtonPosition();
   </script>
   <button type="button" id="clipboardSearchBtn" class="floating-search-btn">剪貼簿搜尋</button>
 </body>
