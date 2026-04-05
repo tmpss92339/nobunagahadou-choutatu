@@ -68,12 +68,22 @@
     }
 
     .bulk-toolbar select,
-    button {
+    button,
+    .bonus-toolbar select {
       font-size: 10px;
       padding: 4px 8px;
       border: 1px solid #CCEEDD;
       border-radius: 4px;
       background: #fff;
+    }
+
+    .bonus-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
     }
 
     button:disabled {
@@ -250,6 +260,22 @@
     </section>
 
     <section class="panel">
+      <div class="bonus-toolbar">
+        <span class="bulk-label">武將等級</span>
+        <select id="extraLevelValue">
+          <option value="1" selected>1</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+          <option value="40">40</option>
+          <option value="45">45</option>
+          <option value="50">50</option>
+        </select>
+      </div>
       <div class="panel-header">
         <div class="panel-title">推薦順序</div>
         <button type="button" id="downloadTablesBtn">下載表格截圖</button>
@@ -387,12 +413,35 @@
     const blockVariables2 = new Array(blockData.length).fill(null);
     const blockVariables3 = new Array(blockData.length).fill(null);
 
-    function calculateValueByType(item, starValue, typeIndex) {
+    function getTitlePrefix(title) {
+      return title.match(/^[A-Z]+/)?.[0] || "";
+    }
+
+    function getExtraBonus(item, extraLevelValue) {
+      const prefix = getTitlePrefix(item.title);
+      const initialPolitics = Number(item.values[3]);
+      const levelFactor = (extraLevelValue - 1) / 49;
+
+      if (prefix === "SR") {
+        return Math.floor(initialPolitics * 1.3 * levelFactor);
+      }
+      if (prefix === "R") {
+        return Math.floor(initialPolitics * 1.1 * levelFactor);
+      }
+      if (prefix === "N") {
+        return Math.floor(initialPolitics * 1 * levelFactor);
+      }
+      return 0;
+    }
+
+    function calculateValueByType(item, starValue, typeIndex, extraLevelValue) {
       const type = item.values[typeIndex];
       const initialPolitics = Number(item.values[3]);
       const maxStarBonus = Number(item.values[4]);
       const typeBonus = stepBonusMap[type] ?? 0;
-      return initialPolitics + typeBonus + ((maxStarBonus + 700) * starValue / 7);
+      const baseValue = initialPolitics + typeBonus + ((maxStarBonus + 700) * starValue / 7);
+      const extraBonus = getExtraBonus(item, extraLevelValue);
+      return baseValue + extraBonus;
     }
 
     function renderRankTable(bodyId, variables) {
@@ -423,6 +472,8 @@
     }
 
     function recalculateAllBlockVariables() {
+      const extraLevelValue = Number(document.getElementById("extraLevelValue").value || 1);
+
       blockData.forEach((item, index) => {
         const checked = document.querySelector(`input[name="block-${index + 1}"]:checked`);
         if (!checked) {
@@ -432,9 +483,9 @@
           return;
         }
         const starValue = Number(checked.value);
-        blockVariables[index] = calculateValueByType(item, starValue, 0);
-        blockVariables2[index] = calculateValueByType(item, starValue, 1);
-        blockVariables3[index] = calculateValueByType(item, starValue, 2);
+        blockVariables[index] = calculateValueByType(item, starValue, 0, extraLevelValue);
+        blockVariables2[index] = calculateValueByType(item, starValue, 1, extraLevelValue);
+        blockVariables3[index] = calculateValueByType(item, starValue, 2, extraLevelValue);
       });
 
       renderRankTable("table1Body", blockVariables);
@@ -477,6 +528,8 @@
     document.querySelectorAll('input[type="radio"]').forEach((radio) => {
       radio.addEventListener("change", recalculateAllBlockVariables);
     });
+
+    document.getElementById("extraLevelValue").addEventListener("change", recalculateAllBlockVariables);
 
     document.getElementById("fillUnansweredBtn").addEventListener("click", () => {
       const bulkValue = document.getElementById("bulkStarValue").value;
@@ -521,7 +574,7 @@
         });
 
         const link = document.createElement("a");
-        link.download = "tables-screenshot.png";
+        link.download = "nobunaga-hadou-choutatu.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
 
