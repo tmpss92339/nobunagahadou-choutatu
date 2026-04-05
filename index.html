@@ -238,11 +238,16 @@
 
     .floating-search-btn {
       position: fixed;
-      left: 12px;
-      top: 12px;
+      left: 8px;
+      top: 8px;
       z-index: 9999;
       font-size: 11px;
-      padding: 8px 10px;
+      padding: 6px 8px;
+      max-width: calc(100vw - 16px);
+      box-sizing: border-box;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       border: 1px solid #88c999;
       border-radius: 999px;
       background: #ffffff;
@@ -252,6 +257,16 @@
 
     .floating-search-btn:hover {
       background: #f3fff6;
+    }
+
+    @media (max-width: 768px) {
+      .floating-search-btn {
+        left: 6px;
+        top: 6px;
+        font-size: 10px;
+        padding: 5px 7px;
+        max-width: calc(100vw - 12px);
+      }
     }
 
     .search-hit {
