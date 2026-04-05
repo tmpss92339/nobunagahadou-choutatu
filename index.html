@@ -672,7 +672,12 @@
       }
     }
 
-    document.getElementById('clipboardSearchBtn').addEventListener('click', searchClipboardText);
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('clipboardSearchBtn');
+      if (btn) {
+        btn.addEventListener('click', searchClipboardText);
+      }
+    });
   </script>
   <button type="button" id="clipboardSearchBtn" class="floating-search-btn">剪貼簿搜尋</button>
 </body>
