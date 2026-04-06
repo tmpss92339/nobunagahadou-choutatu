@@ -107,6 +107,28 @@
       padding: 6px;
       background: #fafFFA;
       box-sizing: border-box;
+      position: relative;
+    }
+
+    .exclude-toggle {
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      line-height: 1;
+      background: rgba(255,255,255,0.92);
+      padding: 1px 4px;
+      border-radius: 999px;
+    }
+
+    .exclude-toggle input[type="checkbox"] {
+      margin: 0;
+      width: 11px;
+      height: 11px;
+      accent-color: #66aa77;
     }
 
     .card-title {
@@ -234,7 +256,6 @@
       background: #E4F9E8;
       font-weight: bold;
     }
-  
 
     .floating-search-btn {
       position: fixed;
@@ -516,7 +537,8 @@
 
       blockData.forEach((item, index) => {
         const checked = document.querySelector(`input[name="block-${index + 1}"]:checked`);
-        if (!checked) {
+        const excluded = document.querySelector(`input[name="exclude-${index + 1}"]`)?.checked;
+        if (!checked || excluded) {
           blockVariables[index] = null;
           blockVariables2[index] = null;
           blockVariables3[index] = null;
@@ -551,6 +573,10 @@
       }
 
       card.innerHTML = `
+        <label class="exclude-toggle">
+          <input type="checkbox" name="exclude-${index + 1}">
+          排除
+        </label>
         <div class="card-title">${item.title}</div>
         <table class="mini-table">
           <tbody>
@@ -567,6 +593,10 @@
 
     document.querySelectorAll('input[type="radio"]').forEach((radio) => {
       radio.addEventListener("change", recalculateAllBlockVariables);
+    });
+
+    document.querySelectorAll('.exclude-toggle input[type="checkbox"]').forEach((checkbox) => {
+      checkbox.addEventListener('change', recalculateAllBlockVariables);
     });
 
     document.getElementById("extraLevelValue").addEventListener("change", recalculateAllBlockVariables);
